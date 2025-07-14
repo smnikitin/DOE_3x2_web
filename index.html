@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>DOE Visualizer - 3 Factors</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min"></script>
@@ -43,15 +43,6 @@
       white-space: pre-wrap;
       max-width: 100%;
     }
-    .main-effects {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-    .main-effects canvas {
-      width: 30%;
-      max-width: 300px;
-    }
   </style>
 </head>
 <body>
@@ -84,13 +75,6 @@
 
   <div class="equation-box" id="equation-result"></div>
 
-  <!-- 🔹 Main Effects Plot Area -->
-  <div class="main-effects">
-    <canvas id="mainEffectX1"></canvas>
-    <canvas id="mainEffectX2"></canvas>
-    <canvas id="mainEffectX3"></canvas>
-  </div>
-
   <script>
     const X1 = [-1, 1, -1, 1, -1, 1, -1, 1];
     const X2 = [-1, -1, 1, 1, -1, -1, 1, 1];
@@ -98,7 +82,6 @@
     const defaultY = [1, 2, 3, 4, 5, 6, 7, 8];
 
     let paretoChart;
-    let mainEffectCharts = [];
 
     window.onload = () => {
       const tbody = document.getElementById('input-rows');
@@ -124,7 +107,7 @@
       document.getElementById("equation-result").textContent = `Estimated Equation:\nY = ${equationText}`;
 
       plotPareto(coeffs);
-      plotMainEffects(Y);
+      // Removed plotMainEffects call to disable main effect plots
     }
 
     function getCoefficients(Y) {
@@ -169,86 +152,6 @@
           }
         }
       });
-    }
-
-    function plotMainEffects(Y) {
-      const factorLevels = [-1, 1];
-      const factors = [X1, X2, X3];
-      const labels = ['X1', 'X2', 'X3'];
-      const canvases = ['mainEffectX1', 'mainEffectX2', 'mainEffectX3'];
-      const colors = ['#e74c3c', '#27ae60', '#2980b9']; // red, green, blue
-
-      // Destroy old charts
-      mainEffectCharts.forEach(chart => chart.destroy());
-      mainEffectCharts = [];
-
-      for (let f = 0; f < 3; f++) {
-        const avg = factorLevels.map(level => {
-          let sum = 0, count = 0;
-          for (let i = 0; i < 8; i++) {
-            if (factors[f][i] === level) {
-              sum += Y[i];
-              count++;
-            }
-          }
-          return sum / count;
-        });
-
-        const ctx = document.getElementById(canvases[f]).getContext("2d");
-        const chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: ['-1', '+1'],
-            datasets: [{
-              label: labels[f],
-              data: avg,
-              borderColor: colors[f],
-              backgroundColor: colors[f],
-              fill: false,
-              tension: 0.2,
-              pointBackgroundColor: colors[f],
-              pointBorderColor: '#000',
-              pointRadius: 6,
-              borderWidth: 3
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              title: {
-                display: true,
-                text: `Main Effect: ${labels[f]}`,
-                color: '#000',
-                font: { size: 16 }
-              },
-              legend: { display: false }
-            },
-            scales: {
-              x: {
-                title: {
-                  display: true,
-                  text: `${labels[f]} Level`,
-                  color: '#000',
-                  font: { size: 14 }
-                },
-                ticks: { color: '#000' },
-                grid: { color: '#ccc' }
-              },
-              y: {
-                title: {
-                  display: true,
-                  text: 'Average Y',
-                  color: '#000',
-                  font: { size: 14 }
-                },
-                ticks: { color: '#000' },
-                grid: { color: '#ccc' }
-              }
-            }
-          }
-        });
-        mainEffectCharts.push(chart);
-      }
     }
   </script>
 </body>
