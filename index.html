@@ -53,29 +53,31 @@
       max-width: 300px;
     }
     .prediction-section {
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #999;
-      border-radius: 6px;
-      max-width: 500px;
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #ccc;
       background-color: #f0f0f0;
-    }
-    .prediction-section h3 {
-      margin-top: 0;
-    }
-    .prediction-section label {
-      margin-right: 5px;
-      font-weight: bold;
+      max-width: 400px;
+      border-radius: 6px;
     }
     .prediction-section input {
-      width: 60px;
-      margin-right: 15px;
-      padding: 3px 5px;
+      width: 80px;
+      padding: 5px;
+      font-size: 1rem;
+    }
+    .prediction-section button {
+      padding: 6px 12px;
+      margin-left: 10px;
+      font-size: 1rem;
     }
     .prediction-result {
-      margin-top: 10px;
-      font-weight: bold;
-      color: #003366;
+      margin-top: 15px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      background: #fff;
+      border: 1px solid #aaa;
+      padding: 10px;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -85,8 +87,8 @@
   <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; background-color: #f9f9f9; border-radius: 6px;">
     <h3 style="margin-top: 0;">Factorial Design Context</h3>
     <p>
-      This tool visualizes a <strong>full factorial design</strong> with <strong>3 factors</strong> (X1, X2, X3), each at <strong>2 levels</strong> (-1 for low, +1 for high).<br />
-      The design consists of <strong>2³ = 8 runs</strong>, covering all possible combinations of factor levels.<br /><br />
+      This tool visualizes a <strong>full factorial design</strong> with <strong>3 factors</strong> (X1, X2, X3), each at <strong>2 levels</strong> (-1 for low, +1 for high).<br>
+      The design consists of <strong>2³ = 8 runs</strong>, covering all possible combinations of factor levels.<br><br>
       The response values (Y) are entered by the user and used to estimate a linear model with main effects and interactions. A Pareto chart shows the relative influence of each term.
     </p>
   </div>
@@ -116,26 +118,13 @@
     <canvas id="mainEffectX3"></canvas>
   </div>
 
-  <!-- Predict X from Y Section -->
+  <!-- Prediction Section -->
   <div class="prediction-section">
-    <h3>Predict Factors (X1, X2, X3) from Y</h3>
-    <label for="inputY">Y: </label>
-    <input type="number" id="inputY" step="any" />
-    <button onclick="predictX()">Predict X</button>
+    <h3>Predict Factors from Y</h3>
+    <label for="predY">Enter Y value:</label>
+    <input type="number" id="predY" step="any" />
+    <button onclick="predictFactors()">Predict X1, X2, X3</button>
     <div class="prediction-result" id="predictionResult"></div>
-  </div>
-
-  <!-- Predict Y from X Section -->
-  <div class="prediction-section">
-    <h3>Predict Y from Factors (X1, X2, X3)</h3>
-    <label for="inputX1">X1: </label>
-    <input type="number" id="inputX1" step="any" min="-1" max="1" value="0" />
-    <label for="inputX2">X2: </label>
-    <input type="number" id="inputX2" step="any" min="-1" max="1" value="0" />
-    <label for="inputX3">X3: </label>
-    <input type="number" id="inputX3" step="any" min="-1" max="1" value="0" />
-    <button onclick="predictYfromX()">Predict Y</button>
-    <div class="prediction-result" id="predictedYResult"></div>
   </div>
 
   <script>
@@ -155,7 +144,7 @@
           <td>${X1[i]}</td>
           <td>${X2[i]}</td>
           <td>${X3[i]}</td>
-          <td><input type="number" value="${defaultY[i]}" id="Y${i}" style="width:60px" /></td>
+          <td><input type="number" value="${defaultY[i]}" id="Y${i}" style="width:60px"></td>
         `;
         tbody.appendChild(row);
       }
@@ -225,6 +214,7 @@
       const canvases = ['mainEffectX1', 'mainEffectX2', 'mainEffectX3'];
       const colors = ['#e74c3c', '#27ae60', '#2980b9']; // red, green, blue
 
+      // Destroy old charts
       mainEffectCharts.forEach(chart => chart.destroy());
       mainEffectCharts = [];
 
@@ -297,49 +287,54 @@
       }
     }
 
-    function predictX() {
-      const Yinput = parseFloat(document.getElementById("inputY").value);
-      if (isNaN(Yinput)) {
+    function predictFactors() {
+      const Ytarget = parseFloat(document.getElementById("predY").value);
+      if (isNaN(Ytarget)) {
         document.getElementById("predictionResult").textContent = "Please enter a valid number for Y.";
         return;
       }
-      const Y = [...Array(8)].map((_, i) => parseFloat(document.getElementById('Y' + i).value));
-      // Find closest Y in table to input Y
-      let minDiff = Infinity, idx = -1;
-      for (let i = 0; i < 8; i++) {
-        const diff = Math.abs(Y[i] - Yinput);
-        if (diff < minDiff) {
-          minDiff = diff;
-          idx = i;
-        }
-      }
-      const predX = `X1 = ${X1[idx]}, X2 = ${X2[idx]}, X3 = ${X3[idx]}`;
-      document.getElementById("predictionResult").textContent = `Closest match:\n${predX}`;
-    }
 
-    function predictYfromX() {
-      const x1 = parseFloat(document.getElementById("inputX1").value);
-      const x2 = parseFloat(document.getElementById("inputX2").value);
-      const x3 = parseFloat(document.getElementById("inputX3").value);
-
-      if ([x1, x2, x3].some(v => isNaN(v) || v < -1 || v > 1)) {
-        document.getElementById("predictedYResult").textContent = "Please enter valid numbers between -1 and 1 for X1, X2, and X3.";
-        return;
-      }
-
+      // Get current coefficients
       const Y = [...Array(8)].map((_, i) => parseFloat(document.getElementById('Y' + i).value));
       const coeffs = getCoefficients(Y);
 
-      const predictedY = coeffs[0]
-        + coeffs[1] * x1
-        + coeffs[2] * x2
-        + coeffs[3] * x3
-        + coeffs[4] * x1 * x2
-        + coeffs[5] * x1 * x3
-        + coeffs[6] * x2 * x3
-        + coeffs[7] * x1 * x2 * x3;
+      // Predict Y for given X1,X2,X3
+      function predictY(x1, x2, x3) {
+        return coeffs[0]
+          + coeffs[1] * x1
+          + coeffs[2] * x2
+          + coeffs[3] * x3
+          + coeffs[4] * x1 * x2
+          + coeffs[5] * x1 * x3
+          + coeffs[6] * x2 * x3
+          + coeffs[7] * x1 * x2 * x3;
+      }
 
-      document.getElementById("predictedYResult").textContent = `Predicted Y = ${predictedY.toFixed(3)}`;
+      // Search for X1, X2, X3 in [-1,1] that minimize |predictY - Ytarget|
+      // We'll do a grid search with a step of 0.05 (can adjust)
+      let bestX = [0,0,0];
+      let minError = Infinity;
+      const step = 0.05;
+
+      for (let x1 = -1; x1 <= 1; x1 += step) {
+        for (let x2 = -1; x2 <= 1; x2 += step) {
+          for (let x3 = -1; x3 <= 1; x3 += step) {
+            const yPred = predictY(x1, x2, x3);
+            const error = Math.abs(yPred - Ytarget);
+            if (error < minError) {
+              minError = error;
+              bestX = [x1, x2, x3];
+            }
+          }
+        }
+      }
+
+      const predictedY = predictY(...bestX);
+
+      document.getElementById("predictionResult").textContent =
+        `Closest predicted Y = ${predictedY.toFixed(3)}\n` +
+        `Predicted factors:\nX1 = ${bestX[0].toFixed(3)}\nX2 = ${bestX[1].toFixed(3)}\nX3 = ${bestX[2].toFixed(3)}\n` +
+        `(Search step: ${step})`;
     }
   </script>
 </body>
