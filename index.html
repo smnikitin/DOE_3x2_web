@@ -43,11 +43,21 @@
       white-space: pre-wrap;
       max-width: 100%;
     }
+    .main-effects {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .main-effects canvas {
+      width: 30%;
+      max-width: 300px;
+    }
   </style>
 </head>
 <body>
-  
-    <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; background-color: #f9f9f9; border-radius: 6px;">
+
+  <!-- Context Section -->
+  <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; background-color: #f9f9f9; border-radius: 6px;">
     <h3 style="margin-top: 0;">Factorial Design Context</h3>
     <p>
       This tool visualizes a <strong>full factorial design</strong> with <strong>3 factors</strong> (X1, X2, X3), each at <strong>2 levels</strong> (-1 for low, +1 for high).<br>
@@ -55,7 +65,7 @@
       The response values (Y) are entered by the user and used to estimate a linear model with main effects and interactions. A Pareto chart shows the relative influence of each term.
     </p>
   </div>
-  
+
   <h2>Design of Experiments (3 Factors - 2 Levels)</h2>
   <div class="top-section">
     <div class="input-table">
@@ -71,7 +81,15 @@
       <canvas id="paretoChart"></canvas>
     </div>
   </div>
+
   <div class="equation-box" id="equation-result"></div>
+
+  <!-- 🔹 New: Main Effects Plot Area -->
+  <div class="main-effects">
+    <canvas id="mainEffectX1"></canvas>
+    <canvas id="mainEffectX2"></canvas>
+    <canvas id="mainEffectX3"></canvas>
+  </div>
 
   <script>
     const X1 = [-1, 1, -1, 1, -1, 1, -1, 1];
@@ -80,6 +98,7 @@
     const defaultY = [1, 2, 3, 4, 5, 6, 7, 8];
 
     let paretoChart;
+    let mainEffectCharts = [];
 
     window.onload = () => {
       const tbody = document.getElementById('input-rows');
@@ -105,6 +124,7 @@
       document.getElementById("equation-result").textContent = `Estimated Equation:\nY = ${equationText}`;
 
       plotPareto(coeffs);
+      plotMainEffects(Y);
     }
 
     function getCoefficients(Y) {
@@ -149,6 +169,64 @@
           }
         }
       });
+    }
+
+    function plotMainEffects(Y) {
+      const factorLevels = [-1, 1];
+      const factors = [X1, X2, X3];
+      const labels = ['X1', 'X2', 'X3'];
+      const canvases = ['mainEffectX1', 'mainEffectX2', 'mainEffectX3'];
+
+      // Destroy old charts
+      mainEffectCharts.forEach(chart => chart.destroy());
+      mainEffectCharts = [];
+
+      for (let f = 0; f < 3; f++) {
+        const avg = factorLevels.map(level => {
+          let sum = 0, count = 0;
+          for (let i = 0; i < 8; i++) {
+            if (factors[f][i] === level) {
+              sum += Y[i];
+              count++;
+            }
+          }
+          return sum / count;
+        });
+
+        const ctx = document.getElementById(canvases[f]).getContext("2d");
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['-1', '+1'],
+            datasets: [{
+              label: labels[f],
+              data: avg,
+              borderColor: 'blue',
+              backgroundColor: 'lightblue',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: `Main Effect: ${labels[f]}`,
+                color: '#000'
+              },
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              x: { title: { display: true, text: `${labels[f]} Level`, color: '#000' }, ticks: { color: '#000' } },
+              y: { title: { display: true, text: 'Average Y', color: '#000' }, ticks: { color: '#000' } }
+            }
+          }
+        });
+        mainEffectCharts.push(chart);
+      }
     }
   </script>
 </body>
