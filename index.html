@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>DOE Visualizer - 3 Factors</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min"></script>
@@ -52,6 +52,33 @@
       width: 30%;
       max-width: 300px;
     }
+    .prediction-section {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      background-color: #f0f0f0;
+      max-width: 400px;
+      border-radius: 6px;
+    }
+    .prediction-section input {
+      width: 80px;
+      padding: 5px;
+      font-size: 1rem;
+    }
+    .prediction-section button {
+      padding: 6px 12px;
+      margin-left: 10px;
+      font-size: 1rem;
+    }
+    .prediction-result {
+      margin-top: 15px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      background: #fff;
+      border: 1px solid #aaa;
+      padding: 10px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -92,12 +119,12 @@
   </div>
 
   <!-- Prediction Section -->
-  <div style="margin-top: 30px; padding: 15px; border: 1px solid #ccc; border-radius: 6px; max-width: 400px;">
-    <h3>Predict Factor Levels from Y</h3>
-    <label for="predY">Enter response value (Y): </label>
-    <input type="number" id="predY" style="width: 100px" />
-    <button onclick="predictFactors()">Predict</button>
-    <div id="predictionResult" style="margin-top: 10px; font-weight: bold; color: #333; white-space: pre-wrap;"></div>
+  <div class="prediction-section">
+    <h3>Predict Factors from Y</h3>
+    <label for="predY">Enter Y value:</label>
+    <input type="number" id="predY" step="any" />
+    <button onclick="predictFactors()">Predict X1, X2, X3</button>
+    <div class="prediction-result" id="predictionResult"></div>
   </div>
 
   <script>
@@ -260,7 +287,6 @@
       }
     }
 
-    // Prediction function to find factor levels closest to input Y
     function predictFactors() {
       const Ytarget = parseFloat(document.getElementById("predY").value);
       if (isNaN(Ytarget)) {
@@ -272,19 +298,7 @@
       const Y = [...Array(8)].map((_, i) => parseFloat(document.getElementById('Y' + i).value));
       const coeffs = getCoefficients(Y);
 
-      // All combinations of X1, X2, X3 (-1, 1)
-      const combinations = [
-        [-1, -1, -1],
-        [-1, -1,  1],
-        [-1,  1, -1],
-        [-1,  1,  1],
-        [ 1, -1, -1],
-        [ 1, -1,  1],
-        [ 1,  1, -1],
-        [ 1,  1,  1],
-      ];
-
-      // Function to predict Y from given X1,X2,X3 using coeffs
+      // Predict Y for given X1,X2,X3
       function predictY(x1, x2, x3) {
         return coeffs[0]
           + coeffs[1] * x1
@@ -296,24 +310,31 @@
           + coeffs[7] * x1 * x2 * x3;
       }
 
-      // Find best match combination minimizing |predictedY - Ytarget|
-      let bestCombo = null;
-      let minDiff = Infinity;
-      let bestYpred = null;
+      // Search for X1, X2, X3 in [-1,1] that minimize |predictY - Ytarget|
+      // We'll do a grid search with a step of 0.05 (can adjust)
+      let bestX = [0,0,0];
+      let minError = Infinity;
+      const step = 0.05;
 
-      for (const [x1, x2, x3] of combinations) {
-        const yPred = predictY(x1, x2, x3);
-        const diff = Math.abs(yPred - Ytarget);
-        if (diff < minDiff) {
-          minDiff = diff;
-          bestCombo = [x1, x2, x3];
-          bestYpred = yPred;
+      for (let x1 = -1; x1 <= 1; x1 += step) {
+        for (let x2 = -1; x2 <= 1; x2 += step) {
+          for (let x3 = -1; x3 <= 1; x3 += step) {
+            const yPred = predictY(x1, x2, x3);
+            const error = Math.abs(yPred - Ytarget);
+            if (error < minError) {
+              minError = error;
+              bestX = [x1, x2, x3];
+            }
+          }
         }
       }
 
-      document.getElementById("predictionResult").textContent = 
-        `Closest predicted Y = ${bestYpred.toFixed(2)}\n` +
-        `Predicted factors: X1 = ${bestCombo[0]}, X2 = ${bestCombo[1]}, X3 = ${bestCombo[2]}`;
+      const predictedY = predictY(...bestX);
+
+      document.getElementById("predictionResult").textContent =
+        `Closest predicted Y = ${predictedY.toFixed(3)}\n` +
+        `Predicted factors:\nX1 = ${bestX[0].toFixed(3)}\nX2 = ${bestX[1].toFixed(3)}\nX3 = ${bestX[2].toFixed(3)}\n` +
+        `(Search step: ${step})`;
     }
   </script>
 </body>
