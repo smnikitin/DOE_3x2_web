@@ -127,6 +127,19 @@
     <div class="prediction-result" id="predictionResult"></div>
   </div>
 
+  <!-- Additional Prediction Section -->
+  <div class="prediction-section" style="margin-top: 20px;">
+    <h3>Predict Y for Given X1, X2, X3</h3>
+    <label for="inputX1">X1:</label>
+    <input type="number" id="inputX1" step="any" value="0" />
+    <label for="inputX2">X2:</label>
+    <input type="number" id="inputX2" step="any" value="0" />
+    <label for="inputX3">X3:</label>
+    <input type="number" id="inputX3" step="any" value="0" />
+    <button onclick="predictYforX()">Predict Y</button>
+    <div class="prediction-result" id="predictionYResult"></div>
+  </div>
+
   <script>
     const X1 = [-1, 1, -1, 1, -1, 1, -1, 1];
     const X2 = [-1, -1, 1, 1, -1, -1, 1, 1];
@@ -335,6 +348,33 @@
         `Closest predicted Y = ${predictedY.toFixed(3)}\n` +
         `Predicted factors:\nX1 = ${bestX[0].toFixed(3)}\nX2 = ${bestX[1].toFixed(3)}\nX3 = ${bestX[2].toFixed(3)}\n` +
         `(Search step: ${step})`;
+    }
+
+    function predictYforX() {
+      const x1 = parseFloat(document.getElementById("inputX1").value);
+      const x2 = parseFloat(document.getElementById("inputX2").value);
+      const x3 = parseFloat(document.getElementById("inputX3").value);
+      if ([x1, x2, x3].some(v => isNaN(v))) {
+        document.getElementById("predictionYResult").textContent = "Please enter valid numbers for X1, X2, and X3.";
+        return;
+      }
+
+      // Get current coefficients from existing function
+      const Y = [...Array(8)].map((_, i) => parseFloat(document.getElementById('Y' + i).value));
+      const coeffs = getCoefficients(Y);
+
+      // Calculate predicted Y
+      const predictedY = coeffs[0]
+        + coeffs[1] * x1
+        + coeffs[2] * x2
+        + coeffs[3] * x3
+        + coeffs[4] * x1 * x2
+        + coeffs[5] * x1 * x3
+        + coeffs[6] * x2 * x3
+        + coeffs[7] * x1 * x2 * x3;
+
+      document.getElementById("predictionYResult").textContent =
+        `Predicted Y = ${predictedY.toFixed(4)}`;
     }
   </script>
 </body>
