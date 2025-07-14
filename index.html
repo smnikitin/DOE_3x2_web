@@ -84,7 +84,7 @@
 
   <div class="equation-box" id="equation-result"></div>
 
-  <!-- 🔹 New: Main Effects Plot Area -->
+  <!-- 🔹 Main Effects Plot Area -->
   <div class="main-effects">
     <canvas id="mainEffectX1"></canvas>
     <canvas id="mainEffectX2"></canvas>
@@ -176,6 +176,7 @@
       const factors = [X1, X2, X3];
       const labels = ['X1', 'X2', 'X3'];
       const canvases = ['mainEffectX1', 'mainEffectX2', 'mainEffectX3'];
+      const colors = ['#e74c3c', '#27ae60', '#2980b9']; // red, green, blue
 
       // Destroy old charts
       mainEffectCharts.forEach(chart => chart.destroy());
@@ -201,10 +202,14 @@
             datasets: [{
               label: labels[f],
               data: avg,
-              borderColor: 'blue',
-              backgroundColor: 'lightblue',
+              borderColor: colors[f],
+              backgroundColor: colors[f],
               fill: false,
-              tension: 0.1
+              tension: 0.2,
+              pointBackgroundColor: colors[f],
+              pointBorderColor: '#000',
+              pointRadius: 6,
+              borderWidth: 3
             }]
           },
           options: {
@@ -213,15 +218,32 @@
               title: {
                 display: true,
                 text: `Main Effect: ${labels[f]}`,
-                color: '#000'
+                color: '#000',
+                font: { size: 16 }
               },
-              legend: {
-                display: false
-              }
+              legend: { display: false }
             },
             scales: {
-              x: { title: { display: true, text: `${labels[f]} Level`, color: '#000' }, ticks: { color: '#000' } },
-              y: { title: { display: true, text: 'Average Y', color: '#000' }, ticks: { color: '#000' } }
+              x: {
+                title: {
+                  display: true,
+                  text: `${labels[f]} Level`,
+                  color: '#000',
+                  font: { size: 14 }
+                },
+                ticks: { color: '#000' },
+                grid: { color: '#ccc' }
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: 'Average Y',
+                  color: '#000',
+                  font: { size: 14 }
+                },
+                ticks: { color: '#000' },
+                grid: { color: '#ccc' }
+              }
             }
           }
         });
