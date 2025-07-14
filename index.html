@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>DOE Visualizer - 3 Factors</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min"></script>
@@ -121,16 +121,7 @@
 
       const termLabels = ["", "\u00b7X1", "\u00b7X2", "\u00b7X3", "\u00b7X1X2", "\u00b7X1X3", "\u00b7X2X3", "\u00b7X1X2X3"];
       const equationText = coeffs.map((c, i) => `${i === 0 ? '' : ' + '}${c.toFixed(2)}${termLabels[i]}`).join('');
-
-      // Compute main effects
-      const mainEffects = [X1, X2, X3].map(factor => {
-        const avgLow = Y.filter((_, i) => factor[i] === -1).reduce((a, b) => a + b, 0) / 4;
-        const avgHigh = Y.filter((_, i) => factor[i] === 1).reduce((a, b) => a + b, 0) / 4;
-        return (avgHigh - avgLow).toFixed(2);
-      });
-
-      const mainEffectLine = `Main Effects – X1: ${mainEffects[0]}, X2: ${mainEffects[1]}, X3: ${mainEffects[2]}`;
-      document.getElementById("equation-result").textContent = `Estimated Equation:\nY = ${equationText}\n${mainEffectLine}`;
+      document.getElementById("equation-result").textContent = `Estimated Equation:\nY = ${equationText}`;
 
       plotPareto(coeffs);
       plotMainEffects(Y);
