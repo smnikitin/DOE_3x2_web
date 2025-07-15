@@ -45,3 +45,20 @@ A lightweight, browser-based visualization tool for **Design of Experiments (DOE
 
 ## 📁 File Structure
 
+├── index.html # Main self-contained HTML file
+├── README.md # You're here
+└── screenshot.png # (optional) UI preview image
+
+
+## ✅ To Do / Improvements
+
+- [ ] Add support for center points or fractional factorials
+- [ ] Export to CSV or PNG
+- [ ] Add response surface plots
+- [ ] Option to rename or describe factors
+
+## 📄 License
+
+MIT License. Free to use, modify, and distribute.
+
+
