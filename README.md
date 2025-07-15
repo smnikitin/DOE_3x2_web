@@ -10,7 +10,7 @@ A lightweight, browser-based visualization tool for **Design of Experiments (DOE
 
 ## 🚀 Live Demo
 
-> Just open the `[index.html](https://smnikitin.github.io/DOE_3x2_web/)` file in your browser. No setup needed.
+> Just open the `https://smnikitin.github.io/DOE_3x2_web/` file in your browser. No setup needed.
 
 ## 📊 Features
 
