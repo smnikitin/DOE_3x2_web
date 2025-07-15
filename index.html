@@ -32,8 +32,8 @@
       text-align: center;
     }
     .chart-box {
-      flex: 1;
       max-width: 400px;
+      flex: 0 0 auto;
     }
     .equation-box {
       margin-top: 10px;
@@ -44,11 +44,11 @@
       max-width: 100%;
     }
     .prediction-section {
-      margin-top: 30px;
+      margin-top: 10px;
       padding: 15px;
       border: 1px solid #ccc;
       background-color: #f0f0f0;
-      max-width: 400px;
+      max-width: 350px;
       border-radius: 6px;
     }
     .prediction-section input {
@@ -70,6 +70,17 @@
       padding: 10px;
       border-radius: 4px;
     }
+    .right-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .right-box {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
   </style>
 </head>
 <body>
@@ -85,6 +96,7 @@
   </div>
 
   <h2>Design of Experiments (3 Factors - 2 Levels)</h2>
+
   <div class="top-section">
     <div class="input-table">
       <table>
@@ -95,36 +107,37 @@
       </table>
       <button onclick="calculate()">Calculate</button>
     </div>
-    <div class="chart-box">
-      <canvas id="paretoChart"></canvas>
+
+    <div class="right-section">
+      <div class="chart-box">
+        <canvas id="paretoChart"></canvas>
+      </div>
+
+      <div class="right-box">
+        <div class="prediction-section">
+          <h3>Predict Factors from Y</h3>
+          <label for="predY">Enter Y value:</label>
+          <input type="number" id="predY" step="any" />
+          <button onclick="predictFactors()">Predict X1, X2, X3</button>
+          <div class="prediction-result" id="predictionResult"></div>
+        </div>
+
+        <div class="prediction-section">
+          <h3>Predict Y for Given X1, X2, X3</h3>
+          <label for="inputX1">X1:</label>
+          <input type="number" id="inputX1" step="any" value="0" />
+          <label for="inputX2">X2:</label>
+          <input type="number" id="inputX2" step="any" value="0" />
+          <label for="inputX3">X3:</label>
+          <input type="number" id="inputX3" step="any" value="0" />
+          <button onclick="predictYforX()">Predict Y</button>
+          <div class="prediction-result" id="predictionYResult"></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="equation-box" id="equation-result"></div>
-
-  <!-- Main effects section has been removed -->
-
-  <!-- Prediction Section -->
-  <div class="prediction-section">
-    <h3>Predict Factors from Y</h3>
-    <label for="predY">Enter Y value:</label>
-    <input type="number" id="predY" step="any" />
-    <button onclick="predictFactors()">Predict X1, X2, X3</button>
-    <div class="prediction-result" id="predictionResult"></div>
-  </div>
-
-  <!-- Additional Prediction Section -->
-  <div class="prediction-section" style="margin-top: 20px;">
-    <h3>Predict Y for Given X1, X2, X3</h3>
-    <label for="inputX1">X1:</label>
-    <input type="number" id="inputX1" step="any" value="0" />
-    <label for="inputX2">X2:</label>
-    <input type="number" id="inputX2" step="any" value="0" />
-    <label for="inputX3">X3:</label>
-    <input type="number" id="inputX3" step="any" value="0" />
-    <button onclick="predictYforX()">Predict Y</button>
-    <div class="prediction-result" id="predictionYResult"></div>
-  </div>
 
   <script>
     const X1 = [-1, 1, -1, 1, -1, 1, -1, 1];
@@ -158,7 +171,6 @@
       document.getElementById("equation-result").textContent = `Estimated Equation:\nY = ${equationText}`;
 
       plotPareto(coeffs);
-      // plotMainEffects(Y); — removed
     }
 
     function getCoefficients(Y) {
